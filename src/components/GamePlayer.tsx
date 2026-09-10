@@ -364,9 +364,103 @@ function StoryGame({ game, onExit }: { game: FestivalGame; onExit: () => void })
   );
 }
 
+function ScratchGuide({ game, onExit }: { game: FestivalGame; onExit: () => void }) {
+  const [done, setDone] = useState<number[]>([]);
+  const steps = game.scratchSteps;
+  const toggle = (i: number) =>
+    setDone((d) => (d.includes(i) ? d.filter((n) => n !== i) : [...d, i]));
+
+  return (
+    <Shell game={game} score={done.length * 100} step={done.length} total={steps.length} onExit={onExit}>
+      <div className="space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-turmeric/15 px-4 py-3">
+          <p className="text-sm text-cream/80">
+            Open Scratch in another tab and follow the steps — tick each one as you build it.
+          </p>
+          <a
+            href="https://scratch.mit.edu/projects/editor/"
+            target="_blank"
+            rel="noreferrer noopener"
+            className="rounded-full bg-marigold px-4 py-1.5 text-sm font-semibold text-dusk-deep ring-1 ring-saffron/70 active:translate-y-px"
+          >
+            Open Scratch editor
+          </a>
+        </div>
+
+        {game.scratchSprites.length > 0 && (
+          <div className="rounded-xl bg-cream p-5 ring-1 ring-black/10">
+            <p className="font-display text-lg font-semibold text-ink">Sprites to make</p>
+            <div className="mt-3 grid gap-2.5 sm:grid-cols-2">
+              {game.scratchSprites.map((sprite, i) => (
+                <div key={i} className="rounded-lg border border-ink/15 px-3 py-2.5">
+                  <p className="text-sm font-semibold text-ink">{sprite.name}</p>
+                  <p className="mt-0.5 text-xs text-ink/65">{sprite.role}</p>
+                  <p className="mt-1 text-xs text-saffron">Draw it: {sprite.costumeIdea}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <ol className="space-y-3">
+          {steps.map((step, i) => {
+            const checked = done.includes(i);
+            return (
+              <li key={i} className="rounded-xl bg-cream p-5 ring-1 ring-black/10">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-wide text-saffron">
+                      Step {i + 1} · {step.target}
+                    </p>
+                    <p className="font-display text-lg font-semibold leading-snug text-ink">{step.title}</p>
+                  </div>
+                  <button
+                    onClick={() => toggle(i)}
+                    className={`rounded-full px-3 py-1.5 text-sm font-semibold ring-1 active:translate-y-px ${
+                      checked ? "bg-teal text-cream ring-teal/70" : "border border-ink/20 text-ink ring-transparent"
+                    }`}
+                  >
+                    {checked ? "Built ✓" : "Mark built"}
+                  </button>
+                </div>
+                <div className="mt-3 space-y-1.5">
+                  {step.blocks.map((block, b) => (
+                    <p
+                      key={b}
+                      className="rounded-lg bg-dusk-deep px-3 py-2 font-mono text-xs text-marigold"
+                      style={{ marginLeft: `${Math.min(b, 3) * 10}px` }}
+                    >
+                      {block}
+                    </p>
+                  ))}
+                </div>
+                <p className="mt-3 rounded-lg bg-turmeric/15 px-3 py-2 text-sm text-ink/75">{step.why}</p>
+              </li>
+            );
+          })}
+        </ol>
+
+        {game.scratchExtras.length > 0 && (
+          <div className="rounded-xl bg-cream p-5 ring-1 ring-black/10">
+            <p className="font-display text-lg font-semibold text-ink">Try next</p>
+            <ul className="mt-2 space-y-1.5">
+              {game.scratchExtras.map((extra, i) => (
+                <li key={i} className="text-sm text-ink/70">
+                  · {extra}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+    </Shell>
+  );
+}
+
 export function GamePlayer({ game, onExit }: { game: FestivalGame; onExit: () => void }) {
   if (game.gameKind === "quiz") return <QuizGame game={game} onExit={onExit} />;
   if (game.gameKind === "memory") return <MemoryGame game={game} onExit={onExit} />;
   if (game.gameKind === "word") return <WordGame game={game} onExit={onExit} />;
+  if (game.gameKind === "scratch") return <ScratchGuide game={game} onExit={onExit} />;
   return <StoryGame game={game} onExit={onExit} />;
 }
