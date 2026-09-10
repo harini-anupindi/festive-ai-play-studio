@@ -126,7 +126,7 @@ function GameCard({
             : "bg-marigold text-dusk-deep ring-saffron/70"
         }`}
       >
-        Play
+        {game.gameKind === "scratch" ? "Open guide" : "Play"}
       </button>
     </article>
   );
