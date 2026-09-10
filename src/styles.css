@@ -19,6 +19,16 @@
  */
 
 @theme inline {
+  --font-display: "Fraunces", serif;
+  --font-body: "Karla", sans-serif;
+  --color-dusk: var(--dusk);
+  --color-dusk-deep: var(--dusk-deep);
+  --color-cream: var(--cream);
+  --color-ink: var(--ink);
+  --color-marigold: var(--marigold);
+  --color-saffron: var(--saffron);
+  --color-turmeric: var(--turmeric);
+  --color-teal: var(--teal);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -62,26 +72,35 @@
 }
 
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.129 0.042 264.695);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.129 0.042 264.695);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: oklch(0.208 0.042 265.755);
-  --primary-foreground: oklch(0.984 0.003 247.858);
-  --secondary: oklch(0.968 0.007 247.896);
-  --secondary-foreground: oklch(0.208 0.042 265.755);
-  --muted: oklch(0.968 0.007 247.896);
-  --muted-foreground: oklch(0.554 0.046 257.417);
-  --accent: oklch(0.968 0.007 247.896);
-  --accent-foreground: oklch(0.208 0.042 265.755);
+  --radius: 0.875rem;
+  --dusk: oklch(0.213 0.071 302);
+  --dusk-deep: oklch(0.165 0.06 300);
+  --cream: oklch(0.944 0.033 90);
+  --ink: oklch(0.256 0.062 305);
+  --marigold: oklch(0.784 0.157 75);
+  --saffron: oklch(0.693 0.166 48);
+  --turmeric: oklch(0.783 0.136 87);
+  --teal: oklch(0.605 0.098 176);
+
+  --background: var(--dusk);
+  --foreground: var(--cream);
+  --card: var(--cream);
+  --card-foreground: var(--ink);
+  --popover: var(--dusk-deep);
+  --popover-foreground: var(--cream);
+  --primary: var(--marigold);
+  --primary-foreground: var(--dusk-deep);
+  --secondary: var(--saffron);
+  --secondary-foreground: var(--cream);
+  --muted: oklch(0.28 0.06 302);
+  --muted-foreground: oklch(0.75 0.03 90);
+  --accent: var(--teal);
+  --accent-foreground: var(--cream);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(0.929 0.013 255.508);
-  --input: oklch(0.929 0.013 255.508);
-  --ring: oklch(0.704 0.04 256.788);
+  --border: oklch(0.784 0.157 75 / 20%);
+  --input: oklch(0.784 0.157 75 / 25%);
+  --ring: var(--marigold);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
