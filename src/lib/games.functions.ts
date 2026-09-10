@@ -120,6 +120,8 @@ const kindBrief: Record<GameKind, string> = {
   word: "Fill wordPuzzles with exactly 6 single festival words (uppercase A-Z only, 4-9 letters, no spaces) each with a playful hint. Leave the other arrays empty.",
   story:
     "Fill storySteps with exactly 5 story scenes, each with exactly 3 creative choices the child can pick. Leave the other arrays empty.",
+  scratch:
+    "Design a real, buildable game in Scratch 3 (scratch.mit.edu) on this festival theme. Fill scratchSprites with 3-4 sprites (name, what it does in the game, a costume/drawing idea) and scratchSteps with exactly 6 build steps in order. Each step names the target sprite or Stage, gives 3-6 blocks written exactly as Scratch block text (e.g. 'when green flag clicked', 'forever', 'if <touching [Modak v]?> then', 'change [score v] by (1)'), and one short line on what the child learns. Fill scratchExtras with 3 challenge ideas to extend the game. Leave the other arrays empty.",
 };
 
 export const generateGame = createServerFn({ method: "POST" })
