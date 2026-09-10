@@ -219,5 +219,8 @@ export const generateGame = createServerFn({ method: "POST" })
       memoryPairs: parsed.memoryPairs ?? [],
       wordPuzzles: parsed.wordPuzzles ?? [],
       storySteps: parsed.storySteps ?? [],
+      scratchSprites: parsed.scratchSprites ?? [],
+      scratchSteps: parsed.scratchSteps ?? [],
+      scratchExtras: parsed.scratchExtras ?? [],
     };
   });
