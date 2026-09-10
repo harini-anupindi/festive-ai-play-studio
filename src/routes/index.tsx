@@ -10,6 +10,7 @@ import quizArt from "@/assets/game-quiz.jpg";
 import memoryArt from "@/assets/game-memory.jpg";
 import wordArt from "@/assets/game-word.jpg";
 import storyArt from "@/assets/game-story.jpg";
+import scratchArt from "@/assets/game-scratch.jpg";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -38,9 +39,10 @@ const KIND_ART: Record<GameKind, string> = {
   memory: memoryArt,
   word: wordArt,
   story: storyArt,
+  scratch: scratchArt,
 };
 
-const KINDS: GameKind[] = ["quiz", "memory", "word", "story"];
+const KINDS: GameKind[] = ["quiz", "memory", "word", "story", "scratch"];
 const AGES = ["Ages 5–8", "Ages 8–12", "Ages 12–15"];
 
 function Lanterns() {
@@ -124,7 +126,7 @@ function GameCard({
             : "bg-marigold text-dusk-deep ring-saffron/70"
         }`}
       >
-        Play
+        {game.gameKind === "scratch" ? "Open guide" : "Play"}
       </button>
     </article>
   );

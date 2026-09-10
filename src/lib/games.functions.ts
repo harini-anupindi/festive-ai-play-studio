@@ -4,7 +4,7 @@ import type { FestivalGame, GameKind } from "./game-types";
 
 const Input = z.object({
   prompt: z.string().min(1).max(600),
-  gameKind: z.enum(["quiz", "memory", "word", "story"]),
+  gameKind: z.enum(["quiz", "memory", "word", "story", "scratch"]),
   ageRange: z.string().min(1).max(40),
 });
 
@@ -20,6 +20,9 @@ const gameSchema = {
     "memoryPairs",
     "wordPuzzles",
     "storySteps",
+    "scratchSprites",
+    "scratchSteps",
+    "scratchExtras",
   ],
   properties: {
     title: { type: "string" },
@@ -79,6 +82,34 @@ const gameSchema = {
         },
       },
     },
+    scratchSprites: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["name", "role", "costumeIdea"],
+        properties: {
+          name: { type: "string" },
+          role: { type: "string" },
+          costumeIdea: { type: "string" },
+        },
+      },
+    },
+    scratchSteps: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["title", "target", "blocks", "why"],
+        properties: {
+          title: { type: "string" },
+          target: { type: "string" },
+          blocks: { type: "array", items: { type: "string" } },
+          why: { type: "string" },
+        },
+      },
+    },
+    scratchExtras: { type: "array", items: { type: "string" } },
   },
 } as const;
 
@@ -89,6 +120,8 @@ const kindBrief: Record<GameKind, string> = {
   word: "Fill wordPuzzles with exactly 6 single festival words (uppercase A-Z only, 4-9 letters, no spaces) each with a playful hint. Leave the other arrays empty.",
   story:
     "Fill storySteps with exactly 5 story scenes, each with exactly 3 creative choices the child can pick. Leave the other arrays empty.",
+  scratch:
+    "Design a real, buildable game in Scratch 3 (scratch.mit.edu) on this festival theme. Fill scratchSprites with 3-4 sprites (name, what it does in the game, a costume/drawing idea) and scratchSteps with exactly 6 build steps in order. Each step names the target sprite or Stage, gives 3-6 blocks written exactly as Scratch block text (e.g. 'when green flag clicked', 'forever', 'if <touching [Modak v]?> then', 'change [score v] by (1)'), and one short line on what the child learns. Fill scratchExtras with 3 challenge ideas to extend the game. Leave the other arrays empty.",
 };
 
 export const generateGame = createServerFn({ method: "POST" })
@@ -186,5 +219,8 @@ export const generateGame = createServerFn({ method: "POST" })
       memoryPairs: parsed.memoryPairs ?? [],
       wordPuzzles: parsed.wordPuzzles ?? [],
       storySteps: parsed.storySteps ?? [],
+      scratchSprites: parsed.scratchSprites ?? [],
+      scratchSteps: parsed.scratchSteps ?? [],
+      scratchExtras: parsed.scratchExtras ?? [],
     };
   });
