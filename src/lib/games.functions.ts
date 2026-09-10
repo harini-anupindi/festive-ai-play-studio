@@ -92,7 +92,7 @@ const kindBrief: Record<GameKind, string> = {
 };
 
 export const generateGame = createServerFn({ method: "POST" })
-  .inputValidator((data: unknown) => Input.parse(data))
+  .validator((data: unknown) => Input.parse(data))
   .handler(async ({ data }): Promise<FestivalGame> => {
     const apiKey = process.env["LOVABLE_API_KEY"];
     if (!apiKey) throw new Error("AI is not configured yet.");
