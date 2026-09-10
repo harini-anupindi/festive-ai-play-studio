@@ -1,4 +1,17 @@
-export type GameKind = "quiz" | "memory" | "word" | "story";
+export type GameKind = "quiz" | "memory" | "word" | "story" | "scratch";
+
+export interface ScratchSprite {
+  name: string;
+  role: string;
+  costumeIdea: string;
+}
+
+export interface ScratchStep {
+  title: string;
+  target: string;
+  blocks: string[];
+  why: string;
+}
 
 export interface QuizQuestion {
   prompt: string;
