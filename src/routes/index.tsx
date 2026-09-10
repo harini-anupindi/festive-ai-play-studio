@@ -135,7 +135,7 @@ function Index() {
     "A shy elephant who loves marigolds and wants to plan the Ganesh Chaturthi immersion for the whole lane.",
   );
   const [kind, setKind] = useState<GameKind>("memory");
-  const [age, setAge] = useState(AGES[1]);
+  const [age, setAge] = useState(AGES[1]!);
   const [games, setGames] = useState<FestivalGame[]>([]);
   const [playing, setPlaying] = useState<FestivalGame | null>(null);
   const [plays, setPlays] = useState<Record<string, number>>({});

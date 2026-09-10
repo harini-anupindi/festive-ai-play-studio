@@ -6,7 +6,9 @@ function shuffle<T>(items: T[]): T[] {
   const copy = [...items];
   for (let i = copy.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [copy[i], copy[j]] = [copy[j], copy[i]];
+    const tmp = copy[i]!;
+    copy[i] = copy[j]!;
+    copy[j] = tmp;
   }
   return copy;
 }
@@ -93,7 +95,7 @@ function QuizGame({ game, onExit }: { game: FestivalGame; onExit: () => void }) 
   const [score, setScore] = useState(0);
   const questions = game.quizQuestions;
   const done = index >= questions.length;
-  const q = questions[index];
+  const q = questions[index]!;
 
   return (
     <Shell game={game} score={score} step={index} total={questions.length} onExit={onExit}>
@@ -183,7 +185,7 @@ function MemoryGame({ game, onExit }: { game: FestivalGame; onExit: () => void }
       if (first.pairId === second.pairId) {
         setMatched((m) => [...m, first.pairId]);
         setScore((s) => s + 120);
-        setNote(game.memoryPairs[first.pairId].fact);
+        setNote(game.memoryPairs[first.pairId]!.fact);
         setFlipped([]);
       } else {
         setTimeout(() => setFlipped([]), 900);
@@ -240,7 +242,7 @@ function WordGame({ game, onExit }: { game: FestivalGame; onExit: () => void }) 
   const [solved, setSolved] = useState(false);
   const puzzles = game.wordPuzzles;
   const done = index >= puzzles.length;
-  const puzzle = puzzles[index];
+  const puzzle = puzzles[index]!;
   const scrambled = useMemo(
     () => (puzzle ? shuffle(puzzle.word.toUpperCase().split("")).join(" ") : ""),
     [puzzle],
@@ -314,7 +316,7 @@ function StoryGame({ game, onExit }: { game: FestivalGame; onExit: () => void })
   const [story, setStory] = useState<string[]>([]);
   const steps = game.storySteps;
   const done = index >= steps.length;
-  const step = steps[index];
+  const step = steps[index]!;
 
   return (
     <Shell game={game} score={story.length * 80} step={index} total={steps.length} onExit={onExit}>
