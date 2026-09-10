@@ -50,6 +50,9 @@ export interface FestivalGame {
   memoryPairs: MemoryPair[];
   wordPuzzles: WordPuzzle[];
   storySteps: StoryStep[];
+  scratchSprites: ScratchSprite[];
+  scratchSteps: ScratchStep[];
+  scratchExtras: string[];
 }
 
 export const GAME_KIND_LABEL: Record<GameKind, string> = {
@@ -57,4 +60,5 @@ export const GAME_KIND_LABEL: Record<GameKind, string> = {
   memory: "Memory match",
   word: "Word puzzle",
   story: "Story builder",
+  scratch: "Scratch build guide",
 };
