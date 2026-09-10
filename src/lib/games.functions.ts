@@ -4,7 +4,7 @@ import type { FestivalGame, GameKind } from "./game-types";
 
 const Input = z.object({
   prompt: z.string().min(1).max(600),
-  gameKind: z.enum(["quiz", "memory", "word", "story"]),
+  gameKind: z.enum(["quiz", "memory", "word", "story", "scratch"]),
   ageRange: z.string().min(1).max(40),
 });
 
@@ -20,6 +20,9 @@ const gameSchema = {
     "memoryPairs",
     "wordPuzzles",
     "storySteps",
+    "scratchSprites",
+    "scratchSteps",
+    "scratchExtras",
   ],
   properties: {
     title: { type: "string" },
@@ -79,6 +82,34 @@ const gameSchema = {
         },
       },
     },
+    scratchSprites: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["name", "role", "costumeIdea"],
+        properties: {
+          name: { type: "string" },
+          role: { type: "string" },
+          costumeIdea: { type: "string" },
+        },
+      },
+    },
+    scratchSteps: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["title", "target", "blocks", "why"],
+        properties: {
+          title: { type: "string" },
+          target: { type: "string" },
+          blocks: { type: "array", items: { type: "string" } },
+          why: { type: "string" },
+        },
+      },
+    },
+    scratchExtras: { type: "array", items: { type: "string" } },
   },
 } as const;
 
