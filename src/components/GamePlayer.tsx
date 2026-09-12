@@ -219,8 +219,10 @@ function MemoryGame({ game, onExit }: { game: FestivalGame; onExit: () => void }
   );
   const [flipped, setFlipped] = useState<string[]>([]);
   const [matched, setMatched] = useState<number[]>([]);
-  const [score, setScore] = useState(0);
+  const [scores, setScores] = useState<[number, number]>([0, 0]);
+  const [turn, setTurn] = useState(0);
   const [note, setNote] = useState<string | null>(null);
+  const score = scores[0] + scores[1];
 
   const flip = (tileId: string, pairId: number) => {
     if (flipped.includes(tileId) || matched.includes(pairId) || flipped.length === 2) return;
@@ -231,11 +233,14 @@ function MemoryGame({ game, onExit }: { game: FestivalGame; onExit: () => void }
       const second = tiles.find((t) => t.id === next[1])!;
       if (first.pairId === second.pairId) {
         setMatched((m) => [...m, first.pairId]);
-        setScore((s) => s + 120);
+        setScores((s) => (turn === 0 ? [s[0] + 120, s[1]] : [s[0], s[1] + 120]));
         setNote(game.memoryPairs[first.pairId]!.fact);
         setFlipped([]);
       } else {
-        setTimeout(() => setFlipped([]), 900);
+        setTimeout(() => {
+          setFlipped([]);
+          if (twoPlayer) setTurn((t) => 1 - t);
+        }, 900);
       }
     }
   };
@@ -243,15 +248,31 @@ function MemoryGame({ game, onExit }: { game: FestivalGame; onExit: () => void }
   const total = game.memoryPairs.length;
 
   return (
-    <Shell game={game} score={score} step={matched.length} total={total} onExit={onExit}>
+    <Shell
+      game={game}
+      score={score}
+      scores={
+        twoPlayer
+          ? [
+              { label: "Player 1", value: scores[0], active: turn === 0 },
+              { label: "Player 2", value: scores[1], active: turn === 1 },
+            ]
+          : undefined
+      }
+      step={matched.length}
+      total={total}
+      onExit={onExit}
+    >
       {matched.length === total ? (
         <Finished
           score={score}
+          result={quizResult(scores, twoPlayer)}
           onRestart={() => {
             setSeed((s) => s + 1);
             setMatched([]);
             setFlipped([]);
-            setScore(0);
+            setScores([0, 0]);
+            setTurn(0);
             setNote(null);
           }}
         />
