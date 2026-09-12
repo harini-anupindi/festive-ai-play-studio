@@ -44,10 +44,26 @@ function Shell({
           <p className="mt-1 text-sm text-cream/60">{game.learningGoal}</p>
         </div>
         <div className="flex items-center gap-4">
-          <div className="text-right">
-            <p className="text-[11px] uppercase tracking-wide text-cream/50">Score</p>
-            <p className="font-display text-2xl font-semibold text-marigold">{score}</p>
-          </div>
+          {scores ? (
+            scores.map((s) => (
+              <div
+                key={s.label}
+                className={`rounded-lg px-2.5 py-1 text-right ring-1 ${
+                  s.active ? "bg-marigold/15 ring-marigold/60" : "ring-transparent"
+                }`}
+              >
+                <p className="text-[11px] uppercase tracking-wide text-cream/50">
+                  {s.active ? `${s.label} · turn` : s.label}
+                </p>
+                <p className="font-display text-2xl font-semibold text-marigold">{s.value}</p>
+              </div>
+            ))
+          ) : (
+            <div className="text-right">
+              <p className="text-[11px] uppercase tracking-wide text-cream/50">Score</p>
+              <p className="font-display text-2xl font-semibold text-marigold">{score}</p>
+            </div>
+          )}
           <div className="text-right">
             <p className="text-[11px] uppercase tracking-wide text-cream/50">Round</p>
             <p className="font-display text-2xl font-semibold text-cream">
@@ -76,11 +92,11 @@ function Shell({
   );
 }
 
-function Finished({ score, onRestart }: { score: number; onRestart: () => void }) {
+function Finished({ score, result, onRestart }: { score: number; result?: string; onRestart: () => void }) {
   return (
     <div className="rounded-xl bg-cream p-6 text-center ring-1 ring-black/10">
       <p className="font-display text-2xl font-semibold text-ink">Well played!</p>
-      <p className="mt-1 text-sm text-ink/60">You finished with {score} points.</p>
+      <p className="mt-1 text-sm text-ink/60">{result ?? `You finished with ${score} points.`}</p>
       <button
         onClick={onRestart}
         className="mt-4 rounded-full bg-marigold px-5 py-2 text-sm font-semibold text-dusk-deep ring-1 ring-saffron/70 active:translate-y-px"
