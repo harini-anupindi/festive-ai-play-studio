@@ -16,6 +16,7 @@ function shuffle<T>(items: T[]): T[] {
 function Shell({
   game,
   score,
+  scores,
   step,
   total,
   onExit,
@@ -23,6 +24,7 @@ function Shell({
 }: {
   game: FestivalGame;
   score: number;
+  scores?: { label: string; value: number; active: boolean }[];
   step: number;
   total: number;
   onExit: () => void;
