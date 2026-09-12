@@ -38,12 +38,14 @@ const KIND_ART: Record<GameKind, string> = {
   quiz: quizArt,
   memory: memoryArt,
   word: wordArt,
+  wordsearch: wordArt,
   story: storyArt,
   scratch: scratchArt,
 };
 
-const KINDS: GameKind[] = ["quiz", "memory", "word", "story", "scratch"];
+const KINDS: GameKind[] = ["quiz", "memory", "word", "wordsearch", "story", "scratch"];
 const AGES = ["Ages 5–8", "Ages 8–12", "Ages 12–15"];
+const GRID_SIZES = [4, 5, 6, 7, 8];
 
 function Lanterns() {
   const lamps = [
