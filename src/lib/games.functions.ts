@@ -242,6 +242,7 @@ export const generateGame = createServerFn({ method: "POST" })
       gameKind: data.gameKind,
       ageRange: data.ageRange,
       playerCount: data.playerCount,
+      gridSize,
       title: parsed.title,
       tagline: parsed.tagline,
       festival: parsed.festival,
@@ -249,6 +250,9 @@ export const generateGame = createServerFn({ method: "POST" })
       quizQuestions: parsed.quizQuestions ?? [],
       memoryPairs: parsed.memoryPairs ?? [],
       wordPuzzles: parsed.wordPuzzles ?? [],
+      searchWords: (parsed.searchWords ?? [])
+        .map((w) => ({ ...w, word: (w.word ?? "").toUpperCase().replace(/[^A-Z]/g, "") }))
+        .filter((w) => w.word.length >= 3 && w.word.length <= gridSize),
       storySteps: parsed.storySteps ?? [],
       scratchSprites: parsed.scratchSprites ?? [],
       scratchSteps: parsed.scratchSteps ?? [],
