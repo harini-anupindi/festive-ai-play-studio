@@ -172,7 +172,8 @@ function QuizGame({ game, onExit }: { game: FestivalGame; onExit: () => void }) 
                   disabled={picked !== null}
                   onClick={() => {
                     setPicked(i);
-                    if (isCorrect) setScore((s) => s + 100);
+                    if (isCorrect)
+                      setScores((s) => (turn === 0 ? [s[0] + 100, s[1]] : [s[0], s[1] + 100]));
                   }}
                   className={`rounded-lg border px-3 py-2.5 text-left text-sm font-semibold transition-colors active:translate-y-px ${state}`}
                 >
@@ -188,6 +189,7 @@ function QuizGame({ game, onExit }: { game: FestivalGame; onExit: () => void }) 
                 onClick={() => {
                   setPicked(null);
                   setIndex((i) => i + 1);
+                  if (twoPlayer) setTurn((t) => 1 - t);
                 }}
                 className="rounded-full bg-marigold px-4 py-1.5 text-sm font-semibold text-dusk-deep ring-1 ring-saffron/70 active:translate-y-px"
               >
