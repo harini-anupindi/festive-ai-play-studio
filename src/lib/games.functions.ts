@@ -4,9 +4,10 @@ import type { FestivalGame, GameKind } from "./game-types";
 
 const Input = z.object({
   prompt: z.string().min(1).max(600),
-  gameKind: z.enum(["quiz", "memory", "word", "story", "scratch"]),
+  gameKind: z.enum(["quiz", "memory", "word", "wordsearch", "story", "scratch"]),
   ageRange: z.string().min(1).max(40),
   playerCount: z.union([z.literal(1), z.literal(2)]),
+  gridSize: z.number().int().min(4).max(8).optional(),
 });
 
 const gameSchema = {
@@ -20,6 +21,7 @@ const gameSchema = {
     "quizQuestions",
     "memoryPairs",
     "wordPuzzles",
+    "searchWords",
     "storySteps",
     "scratchSprites",
     "scratchSteps",
