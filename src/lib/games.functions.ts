@@ -156,8 +156,13 @@ export const generateGame = createServerFn({ method: "POST" })
         ? "Two children will play together taking turns on the same device, so make prompts and facts friendly for turn-taking."
         : "One child will play solo.",
       kindBrief[data.gameKind],
+      data.gameKind === "wordsearch"
+        ? `The grid is ${gridSize}x${gridSize}, so every word must be between 3 and ${gridSize} letters long. Give exactly ${gridSize <= 5 ? 4 : 6} words.`
+        : "",
       "Keep every text field short: titles under 40 characters, tagline under 90 characters, facts under 140 characters.",
-    ].join(" ");
+    ]
+      .filter(Boolean)
+      .join(" ");
 
     const res = await fetch("https://ai.gateway.lovable.dev/v1/responses", {
       method: "POST",
