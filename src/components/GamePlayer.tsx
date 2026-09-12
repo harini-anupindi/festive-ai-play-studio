@@ -24,7 +24,7 @@ function Shell({
 }: {
   game: FestivalGame;
   score: number;
-  scores?: { label: string; value: number; active: boolean }[];
+  scores?: { label: string; value: number; active: boolean }[] | undefined;
   step: number;
   total: number;
   onExit: () => void;
@@ -92,7 +92,15 @@ function Shell({
   );
 }
 
-function Finished({ score, result, onRestart }: { score: number; result?: string; onRestart: () => void }) {
+function Finished({
+  score,
+  result,
+  onRestart,
+}: {
+  score: number;
+  result?: string | undefined;
+  onRestart: () => void;
+}) {
   return (
     <div className="rounded-xl bg-cream p-6 text-center ring-1 ring-black/10">
       <p className="font-display text-2xl font-semibold text-ink">Well played!</p>
