@@ -116,6 +116,7 @@ function GameCard({
         }`}
       >
         <span>{game.ageRange}</span>
+        <span>{game.playerCount === 2 ? "2 players" : "1 player"}</span>
         <span>{game.festival}</span>
       </div>
       <button
@@ -138,13 +139,14 @@ function Index() {
   );
   const [kind, setKind] = useState<GameKind>("memory");
   const [age, setAge] = useState(AGES[1]!);
+  const [players, setPlayers] = useState<1 | 2>(1);
   const [games, setGames] = useState<FestivalGame[]>([]);
   const [playing, setPlaying] = useState<FestivalGame | null>(null);
   const [plays, setPlays] = useState<Record<string, number>>({});
 
   const callGenerate = useServerFn(generateGame);
   const mutation = useMutation({
-    mutationFn: (input: { prompt: string; gameKind: GameKind; ageRange: string }) =>
+    mutationFn: (input: { prompt: string; gameKind: GameKind; ageRange: string; playerCount: 1 | 2 }) =>
       callGenerate({ data: input }),
     onSuccess: (game) => {
       setGames((g) => [game, ...g]);
@@ -248,11 +250,28 @@ function Index() {
                   </button>
                 ))}
               </div>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {([1, 2] as const).map((p) => (
+                  <button
+                    key={p}
+                    onClick={() => setPlayers(p)}
+                    className={`rounded-full px-3 py-1 text-xs font-semibold ring-1 active:translate-y-px ${
+                      players === p
+                        ? "bg-dusk-deep text-marigold ring-dusk-deep"
+                        : "border border-ink/20 text-ink/70 ring-transparent"
+                    }`}
+                  >
+                    {p === 1 ? "1 player" : "2 players · take turns"}
+                  </button>
+                ))}
+              </div>
               <div className="mt-4 flex items-center justify-between gap-3">
-                <span className="text-xs text-ink/50">{age} · 1 player</span>
+                <span className="text-xs text-ink/50">
+                  {age} · {players === 2 ? "2 players" : "1 player"}
+                </span>
                 <button
                   disabled={mutation.isPending || prompt.trim().length === 0}
-                  onClick={() => mutation.mutate({ prompt, gameKind: kind, ageRange: age })}
+                  onClick={() => mutation.mutate({ prompt, gameKind: kind, ageRange: age, playerCount: players })}
                   className="rounded-full bg-marigold px-4 py-2 text-sm font-semibold text-dusk-deep ring-1 ring-saffron/70 active:translate-y-px disabled:opacity-60"
                 >
                   {mutation.isPending ? "Weaving…" : "Generate game"}

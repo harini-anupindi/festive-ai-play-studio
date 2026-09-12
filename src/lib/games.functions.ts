@@ -6,6 +6,7 @@ const Input = z.object({
   prompt: z.string().min(1).max(600),
   gameKind: z.enum(["quiz", "memory", "word", "story", "scratch"]),
   ageRange: z.string().min(1).max(40),
+  playerCount: z.union([z.literal(1), z.literal(2)]),
 });
 
 const gameSchema = {
@@ -134,6 +135,9 @@ export const generateGame = createServerFn({ method: "POST" })
       "You design warm, educational, creative mini-games for children based on Indian and world festival themes.",
       "Content must be culturally respectful, factually accurate and age-appropriate.",
       `Target audience: ${data.ageRange}.`,
+      data.playerCount === 2
+        ? "Two children will play together taking turns on the same device, so make prompts and facts friendly for turn-taking."
+        : "One child will play solo.",
       kindBrief[data.gameKind],
       "Keep every text field short: titles under 40 characters, tagline under 90 characters, facts under 140 characters.",
     ].join(" ");
@@ -211,6 +215,7 @@ export const generateGame = createServerFn({ method: "POST" })
       id: crypto.randomUUID(),
       gameKind: data.gameKind,
       ageRange: data.ageRange,
+      playerCount: data.playerCount,
       title: parsed.title,
       tagline: parsed.tagline,
       festival: parsed.festival,

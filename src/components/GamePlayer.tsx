@@ -16,6 +16,7 @@ function shuffle<T>(items: T[]): T[] {
 function Shell({
   game,
   score,
+  scores,
   step,
   total,
   onExit,
@@ -23,6 +24,7 @@ function Shell({
 }: {
   game: FestivalGame;
   score: number;
+  scores?: { label: string; value: number; active: boolean }[] | undefined;
   step: number;
   total: number;
   onExit: () => void;
@@ -42,10 +44,26 @@ function Shell({
           <p className="mt-1 text-sm text-cream/60">{game.learningGoal}</p>
         </div>
         <div className="flex items-center gap-4">
-          <div className="text-right">
-            <p className="text-[11px] uppercase tracking-wide text-cream/50">Score</p>
-            <p className="font-display text-2xl font-semibold text-marigold">{score}</p>
-          </div>
+          {scores ? (
+            scores.map((s) => (
+              <div
+                key={s.label}
+                className={`rounded-lg px-2.5 py-1 text-right ring-1 ${
+                  s.active ? "bg-marigold/15 ring-marigold/60" : "ring-transparent"
+                }`}
+              >
+                <p className="text-[11px] uppercase tracking-wide text-cream/50">
+                  {s.active ? `${s.label} · turn` : s.label}
+                </p>
+                <p className="font-display text-2xl font-semibold text-marigold">{s.value}</p>
+              </div>
+            ))
+          ) : (
+            <div className="text-right">
+              <p className="text-[11px] uppercase tracking-wide text-cream/50">Score</p>
+              <p className="font-display text-2xl font-semibold text-marigold">{score}</p>
+            </div>
+          )}
           <div className="text-right">
             <p className="text-[11px] uppercase tracking-wide text-cream/50">Round</p>
             <p className="font-display text-2xl font-semibold text-cream">
@@ -74,11 +92,19 @@ function Shell({
   );
 }
 
-function Finished({ score, onRestart }: { score: number; onRestart: () => void }) {
+function Finished({
+  score,
+  result,
+  onRestart,
+}: {
+  score: number;
+  result?: string | undefined;
+  onRestart: () => void;
+}) {
   return (
     <div className="rounded-xl bg-cream p-6 text-center ring-1 ring-black/10">
       <p className="font-display text-2xl font-semibold text-ink">Well played!</p>
-      <p className="mt-1 text-sm text-ink/60">You finished with {score} points.</p>
+      <p className="mt-1 text-sm text-ink/60">{result ?? `You finished with ${score} points.`}</p>
       <button
         onClick={onRestart}
         className="mt-4 rounded-full bg-marigold px-5 py-2 text-sm font-semibold text-dusk-deep ring-1 ring-saffron/70 active:translate-y-px"
@@ -89,22 +115,48 @@ function Finished({ score, onRestart }: { score: number; onRestart: () => void }
   );
 }
 
+function quizResult(scores: [number, number], twoPlayer: boolean): string | undefined {
+  if (!twoPlayer) return undefined;
+  if (scores[0] === scores[1]) return `It's a tie — ${scores[0]} points each!`;
+  const winner = scores[0] > scores[1] ? "Player 1" : "Player 2";
+  return `${winner} wins ${Math.max(...scores)} – ${Math.min(...scores)}!`;
+}
+
 function QuizGame({ game, onExit }: { game: FestivalGame; onExit: () => void }) {
+  const twoPlayer = game.playerCount === 2;
   const [index, setIndex] = useState(0);
   const [picked, setPicked] = useState<number | null>(null);
-  const [score, setScore] = useState(0);
+  const [scores, setScores] = useState<[number, number]>([0, 0]);
+  const [turn, setTurn] = useState(0);
   const questions = game.quizQuestions;
   const done = index >= questions.length;
   const q = questions[index]!;
+  const score = scores[0] + scores[1];
 
   return (
-    <Shell game={game} score={score} step={index} total={questions.length} onExit={onExit}>
+    <Shell
+      game={game}
+      score={score}
+      scores={
+        twoPlayer
+          ? [
+              { label: "Player 1", value: scores[0], active: turn === 0 },
+              { label: "Player 2", value: scores[1], active: turn === 1 },
+            ]
+          : undefined
+      }
+      step={index}
+      total={questions.length}
+      onExit={onExit}
+    >
       {done ? (
         <Finished
           score={score}
+          result={quizResult(scores, twoPlayer)}
           onRestart={() => {
             setIndex(0);
-            setScore(0);
+            setScores([0, 0]);
+            setTurn(0);
             setPicked(null);
           }}
         />
@@ -128,7 +180,8 @@ function QuizGame({ game, onExit }: { game: FestivalGame; onExit: () => void }) 
                   disabled={picked !== null}
                   onClick={() => {
                     setPicked(i);
-                    if (isCorrect) setScore((s) => s + 100);
+                    if (isCorrect)
+                      setScores((s) => (turn === 0 ? [s[0] + 100, s[1]] : [s[0], s[1] + 100]));
                   }}
                   className={`rounded-lg border px-3 py-2.5 text-left text-sm font-semibold transition-colors active:translate-y-px ${state}`}
                 >
@@ -144,6 +197,7 @@ function QuizGame({ game, onExit }: { game: FestivalGame; onExit: () => void }) 
                 onClick={() => {
                   setPicked(null);
                   setIndex((i) => i + 1);
+                  if (twoPlayer) setTurn((t) => 1 - t);
                 }}
                 className="rounded-full bg-marigold px-4 py-1.5 text-sm font-semibold text-dusk-deep ring-1 ring-saffron/70 active:translate-y-px"
               >
@@ -158,6 +212,7 @@ function QuizGame({ game, onExit }: { game: FestivalGame; onExit: () => void }) 
 }
 
 function MemoryGame({ game, onExit }: { game: FestivalGame; onExit: () => void }) {
+  const twoPlayer = game.playerCount === 2;
   const [seed, setSeed] = useState(0);
   const tiles = useMemo(
     () =>
@@ -172,8 +227,10 @@ function MemoryGame({ game, onExit }: { game: FestivalGame; onExit: () => void }
   );
   const [flipped, setFlipped] = useState<string[]>([]);
   const [matched, setMatched] = useState<number[]>([]);
-  const [score, setScore] = useState(0);
+  const [scores, setScores] = useState<[number, number]>([0, 0]);
+  const [turn, setTurn] = useState(0);
   const [note, setNote] = useState<string | null>(null);
+  const score = scores[0] + scores[1];
 
   const flip = (tileId: string, pairId: number) => {
     if (flipped.includes(tileId) || matched.includes(pairId) || flipped.length === 2) return;
@@ -184,11 +241,14 @@ function MemoryGame({ game, onExit }: { game: FestivalGame; onExit: () => void }
       const second = tiles.find((t) => t.id === next[1])!;
       if (first.pairId === second.pairId) {
         setMatched((m) => [...m, first.pairId]);
-        setScore((s) => s + 120);
+        setScores((s) => (turn === 0 ? [s[0] + 120, s[1]] : [s[0], s[1] + 120]));
         setNote(game.memoryPairs[first.pairId]!.fact);
         setFlipped([]);
       } else {
-        setTimeout(() => setFlipped([]), 900);
+        setTimeout(() => {
+          setFlipped([]);
+          if (twoPlayer) setTurn((t) => 1 - t);
+        }, 900);
       }
     }
   };
@@ -196,15 +256,31 @@ function MemoryGame({ game, onExit }: { game: FestivalGame; onExit: () => void }
   const total = game.memoryPairs.length;
 
   return (
-    <Shell game={game} score={score} step={matched.length} total={total} onExit={onExit}>
+    <Shell
+      game={game}
+      score={score}
+      scores={
+        twoPlayer
+          ? [
+              { label: "Player 1", value: scores[0], active: turn === 0 },
+              { label: "Player 2", value: scores[1], active: turn === 1 },
+            ]
+          : undefined
+      }
+      step={matched.length}
+      total={total}
+      onExit={onExit}
+    >
       {matched.length === total ? (
         <Finished
           score={score}
+          result={quizResult(scores, twoPlayer)}
           onRestart={() => {
             setSeed((s) => s + 1);
             setMatched([]);
             setFlipped([]);
-            setScore(0);
+            setScores([0, 0]);
+            setTurn(0);
             setNote(null);
           }}
         />
