@@ -6,6 +6,7 @@ const Input = z.object({
   prompt: z.string().min(1).max(600),
   gameKind: z.enum(["quiz", "memory", "word", "story", "scratch"]),
   ageRange: z.string().min(1).max(40),
+  playerCount: z.union([z.literal(1), z.literal(2)]),
 });
 
 const gameSchema = {

@@ -45,6 +45,7 @@ export interface FestivalGame {
   festival: string;
   gameKind: GameKind;
   ageRange: string;
+  playerCount: 1 | 2;
   learningGoal: string;
   quizQuestions: QuizQuestion[];
   memoryPairs: MemoryPair[];
