@@ -107,22 +107,48 @@ function Finished({ score, result, onRestart }: { score: number; result?: string
   );
 }
 
+function quizResult(scores: [number, number], twoPlayer: boolean): string | undefined {
+  if (!twoPlayer) return undefined;
+  if (scores[0] === scores[1]) return `It's a tie — ${scores[0]} points each!`;
+  const winner = scores[0] > scores[1] ? "Player 1" : "Player 2";
+  return `${winner} wins ${Math.max(...scores)} – ${Math.min(...scores)}!`;
+}
+
 function QuizGame({ game, onExit }: { game: FestivalGame; onExit: () => void }) {
+  const twoPlayer = game.playerCount === 2;
   const [index, setIndex] = useState(0);
   const [picked, setPicked] = useState<number | null>(null);
-  const [score, setScore] = useState(0);
+  const [scores, setScores] = useState<[number, number]>([0, 0]);
+  const [turn, setTurn] = useState(0);
   const questions = game.quizQuestions;
   const done = index >= questions.length;
   const q = questions[index]!;
+  const score = scores[0] + scores[1];
 
   return (
-    <Shell game={game} score={score} step={index} total={questions.length} onExit={onExit}>
+    <Shell
+      game={game}
+      score={score}
+      scores={
+        twoPlayer
+          ? [
+              { label: "Player 1", value: scores[0], active: turn === 0 },
+              { label: "Player 2", value: scores[1], active: turn === 1 },
+            ]
+          : undefined
+      }
+      step={index}
+      total={questions.length}
+      onExit={onExit}
+    >
       {done ? (
         <Finished
           score={score}
+          result={quizResult(scores, twoPlayer)}
           onRestart={() => {
             setIndex(0);
-            setScore(0);
+            setScores([0, 0]);
+            setTurn(0);
             setPicked(null);
           }}
         />
