@@ -204,6 +204,7 @@ function QuizGame({ game, onExit }: { game: FestivalGame; onExit: () => void }) 
 }
 
 function MemoryGame({ game, onExit }: { game: FestivalGame; onExit: () => void }) {
+  const twoPlayer = game.playerCount === 2;
   const [seed, setSeed] = useState(0);
   const tiles = useMemo(
     () =>
