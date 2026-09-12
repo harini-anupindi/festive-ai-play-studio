@@ -116,6 +116,7 @@ function GameCard({
         }`}
       >
         <span>{game.ageRange}</span>
+        <span>{game.playerCount === 2 ? "2 players" : "1 player"}</span>
         <span>{game.festival}</span>
       </div>
       <button
@@ -138,13 +139,14 @@ function Index() {
   );
   const [kind, setKind] = useState<GameKind>("memory");
   const [age, setAge] = useState(AGES[1]!);
+  const [players, setPlayers] = useState<1 | 2>(1);
   const [games, setGames] = useState<FestivalGame[]>([]);
   const [playing, setPlaying] = useState<FestivalGame | null>(null);
   const [plays, setPlays] = useState<Record<string, number>>({});
 
   const callGenerate = useServerFn(generateGame);
   const mutation = useMutation({
-    mutationFn: (input: { prompt: string; gameKind: GameKind; ageRange: string }) =>
+    mutationFn: (input: { prompt: string; gameKind: GameKind; ageRange: string; playerCount: 1 | 2 }) =>
       callGenerate({ data: input }),
     onSuccess: (game) => {
       setGames((g) => [game, ...g]);
