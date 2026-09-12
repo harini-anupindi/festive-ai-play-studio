@@ -1,4 +1,4 @@
-export type GameKind = "quiz" | "memory" | "word" | "story" | "scratch";
+export type GameKind = "quiz" | "memory" | "word" | "wordsearch" | "story" | "scratch";
 
 export interface ScratchSprite {
   name: string;
@@ -46,10 +46,12 @@ export interface FestivalGame {
   gameKind: GameKind;
   ageRange: string;
   playerCount: 1 | 2;
+  gridSize: number;
   learningGoal: string;
   quizQuestions: QuizQuestion[];
   memoryPairs: MemoryPair[];
   wordPuzzles: WordPuzzle[];
+  searchWords: WordPuzzle[];
   storySteps: StoryStep[];
   scratchSprites: ScratchSprite[];
   scratchSteps: ScratchStep[];
@@ -60,6 +62,7 @@ export const GAME_KIND_LABEL: Record<GameKind, string> = {
   quiz: "Quiz",
   memory: "Memory match",
   word: "Word puzzle",
+  wordsearch: "Word search",
   story: "Story builder",
   scratch: "Scratch build guide",
 };
