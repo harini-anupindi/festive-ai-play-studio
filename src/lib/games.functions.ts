@@ -134,6 +134,8 @@ const kindBrief: Record<GameKind, string> = {
   memory:
     "Fill memoryPairs with exactly 6 pairs (term and its matching partner, e.g. a ritual and its meaning). Leave the other arrays empty.",
   word: "Fill wordPuzzles with exactly 6 single festival words (uppercase A-Z only, 4-9 letters, no spaces) each with a playful hint. Leave the other arrays empty.",
+  wordsearch:
+    "Fill searchWords with festival words for a word-search grid (uppercase A-Z only, no spaces or accents) each with a short clue and a fact. Leave the other arrays empty.",
   story:
     "Fill storySteps with exactly 5 story scenes, each with exactly 3 creative choices the child can pick. Leave the other arrays empty.",
   scratch:
