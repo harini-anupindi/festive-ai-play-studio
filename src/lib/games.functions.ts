@@ -148,6 +148,10 @@ export const generateGame = createServerFn({ method: "POST" })
     const apiKey = process.env["LOVABLE_API_KEY"];
     if (!apiKey) throw new Error("AI is not configured yet.");
 
+    const gridSize = data.gridSize ?? 6;
+
+
+
     const instructions = [
       "You design warm, educational, creative mini-games for children based on Indian and world festival themes.",
       "Content must be culturally respectful, factually accurate and age-appropriate.",
