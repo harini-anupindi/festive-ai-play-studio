@@ -72,6 +72,19 @@ const gameSchema = {
         },
       },
     },
+    searchWords: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["word", "hint", "fact"],
+        properties: {
+          word: { type: "string" },
+          hint: { type: "string" },
+          fact: { type: "string" },
+        },
+      },
+    },
     storySteps: {
       type: "array",
       items: {
