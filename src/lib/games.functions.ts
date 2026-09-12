@@ -4,9 +4,10 @@ import type { FestivalGame, GameKind } from "./game-types";
 
 const Input = z.object({
   prompt: z.string().min(1).max(600),
-  gameKind: z.enum(["quiz", "memory", "word", "story", "scratch"]),
+  gameKind: z.enum(["quiz", "memory", "word", "wordsearch", "story", "scratch"]),
   ageRange: z.string().min(1).max(40),
   playerCount: z.union([z.literal(1), z.literal(2)]),
+  gridSize: z.number().int().min(4).max(8).optional(),
 });
 
 const gameSchema = {
@@ -20,6 +21,7 @@ const gameSchema = {
     "quizQuestions",
     "memoryPairs",
     "wordPuzzles",
+    "searchWords",
     "storySteps",
     "scratchSprites",
     "scratchSteps",
@@ -58,6 +60,19 @@ const gameSchema = {
       },
     },
     wordPuzzles: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["word", "hint", "fact"],
+        properties: {
+          word: { type: "string" },
+          hint: { type: "string" },
+          fact: { type: "string" },
+        },
+      },
+    },
+    searchWords: {
       type: "array",
       items: {
         type: "object",
@@ -119,6 +134,8 @@ const kindBrief: Record<GameKind, string> = {
   memory:
     "Fill memoryPairs with exactly 6 pairs (term and its matching partner, e.g. a ritual and its meaning). Leave the other arrays empty.",
   word: "Fill wordPuzzles with exactly 6 single festival words (uppercase A-Z only, 4-9 letters, no spaces) each with a playful hint. Leave the other arrays empty.",
+  wordsearch:
+    "Fill searchWords with festival words for a word-search grid (uppercase A-Z only, no spaces or accents) each with a short clue and a fact. Leave the other arrays empty.",
   story:
     "Fill storySteps with exactly 5 story scenes, each with exactly 3 creative choices the child can pick. Leave the other arrays empty.",
   scratch:
@@ -131,6 +148,10 @@ export const generateGame = createServerFn({ method: "POST" })
     const apiKey = process.env["LOVABLE_API_KEY"];
     if (!apiKey) throw new Error("AI is not configured yet.");
 
+    const gridSize = data.gridSize ?? 6;
+
+
+
     const instructions = [
       "You design warm, educational, creative mini-games for children based on Indian and world festival themes.",
       "Content must be culturally respectful, factually accurate and age-appropriate.",
@@ -139,8 +160,13 @@ export const generateGame = createServerFn({ method: "POST" })
         ? "Two children will play together taking turns on the same device, so make prompts and facts friendly for turn-taking."
         : "One child will play solo.",
       kindBrief[data.gameKind],
+      data.gameKind === "wordsearch"
+        ? `The grid is ${gridSize}x${gridSize}, so every word must be between 3 and ${gridSize} letters long. Give exactly ${gridSize <= 5 ? 4 : 6} words.`
+        : "",
       "Keep every text field short: titles under 40 characters, tagline under 90 characters, facts under 140 characters.",
-    ].join(" ");
+    ]
+      .filter(Boolean)
+      .join(" ");
 
     const res = await fetch("https://ai.gateway.lovable.dev/v1/responses", {
       method: "POST",
@@ -216,6 +242,7 @@ export const generateGame = createServerFn({ method: "POST" })
       gameKind: data.gameKind,
       ageRange: data.ageRange,
       playerCount: data.playerCount,
+      gridSize,
       title: parsed.title,
       tagline: parsed.tagline,
       festival: parsed.festival,
@@ -223,6 +250,9 @@ export const generateGame = createServerFn({ method: "POST" })
       quizQuestions: parsed.quizQuestions ?? [],
       memoryPairs: parsed.memoryPairs ?? [],
       wordPuzzles: parsed.wordPuzzles ?? [],
+      searchWords: (parsed.searchWords ?? [])
+        .map((w) => ({ ...w, word: (w.word ?? "").toUpperCase().replace(/[^A-Z]/g, "") }))
+        .filter((w) => w.word.length >= 3 && w.word.length <= gridSize),
       storySteps: parsed.storySteps ?? [],
       scratchSprites: parsed.scratchSprites ?? [],
       scratchSteps: parsed.scratchSteps ?? [],

@@ -533,10 +533,209 @@ function ScratchGuide({ game, onExit }: { game: FestivalGame; onExit: () => void
   );
 }
 
+const DIRS = [
+  [0, 1],
+  [1, 0],
+  [1, 1],
+  [1, -1],
+  [0, -1],
+  [-1, 0],
+  [-1, -1],
+  [-1, 1],
+] as const;
+
+const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+function buildGrid(words: string[], size: number) {
+  const grid: (string | null)[][] = Array.from({ length: size }, () => Array(size).fill(null));
+  const placed: { word: string; cells: string[] }[] = [];
+
+  for (const word of words) {
+    let done = false;
+    for (let attempt = 0; attempt < 250 && !done; attempt++) {
+      const dir = DIRS[Math.floor(Math.random() * DIRS.length)]!;
+      const row = Math.floor(Math.random() * size);
+      const col = Math.floor(Math.random() * size);
+      const endRow = row + dir[0] * (word.length - 1);
+      const endCol = col + dir[1] * (word.length - 1);
+      if (endRow < 0 || endRow >= size || endCol < 0 || endCol >= size) continue;
+      let fits = true;
+      for (let i = 0; i < word.length; i++) {
+        const cell = grid[row + dir[0] * i]![col + dir[1] * i]!;
+        if (cell !== null && cell !== word[i]) {
+          fits = false;
+          break;
+        }
+      }
+      if (!fits) continue;
+      const cells: string[] = [];
+      for (let i = 0; i < word.length; i++) {
+        const r = row + dir[0] * i;
+        const c = col + dir[1] * i;
+        grid[r]![c] = word[i]!;
+        cells.push(`${r}-${c}`);
+      }
+      placed.push({ word, cells });
+      done = true;
+    }
+  }
+
+  const letters = grid.map((row) =>
+    row.map((cell) => cell ?? LETTERS[Math.floor(Math.random() * LETTERS.length)]!),
+  );
+  return { letters, placed };
+}
+
+function WordSearchGame({ game, onExit }: { game: FestivalGame; onExit: () => void }) {
+  const twoPlayer = game.playerCount === 2;
+  const size = Math.min(8, Math.max(4, game.gridSize || 6));
+  const [seed, setSeed] = useState(0);
+  const { letters, placed } = useMemo(
+    () => buildGrid(game.searchWords.map((w) => w.word.toUpperCase()), size),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [game, size, seed],
+  );
+  const [found, setFound] = useState<string[]>([]);
+  const [start, setStart] = useState<string | null>(null);
+  const [scores, setScores] = useState<[number, number]>([0, 0]);
+  const [turn, setTurn] = useState(0);
+  const [note, setNote] = useState<string | null>(null);
+  const score = scores[0] + scores[1];
+
+  const foundCells = new Set(placed.filter((p) => found.includes(p.word)).flatMap((p) => p.cells));
+
+  const pick = (key: string) => {
+    if (!start) {
+      setStart(key);
+      return;
+    }
+    if (start === key) {
+      setStart(null);
+      return;
+    }
+    const [r1, c1] = start.split("-").map(Number) as [number, number];
+    const [r2, c2] = key.split("-").map(Number) as [number, number];
+    const dr = Math.sign(r2 - r1);
+    const dc = Math.sign(c2 - c1);
+    const len = Math.max(Math.abs(r2 - r1), Math.abs(c2 - c1)) + 1;
+    const straight =
+      r1 === r2 || c1 === c2 || Math.abs(r2 - r1) === Math.abs(c2 - c1);
+    setStart(null);
+    if (!straight) return;
+    let text = "";
+    for (let i = 0; i < len; i++) text += letters[r1 + dr * i]![c1 + dc * i]!;
+    const reversed = [...text].reverse().join("");
+    const hit = placed.find(
+      (p) => !found.includes(p.word) && (p.word === text || p.word === reversed),
+    );
+    if (hit) {
+      setFound((f) => [...f, hit.word]);
+      setScores((s) => (turn === 0 ? [s[0] + 130, s[1]] : [s[0], s[1] + 130]));
+      setNote(game.searchWords.find((w) => w.word.toUpperCase() === hit.word)?.fact ?? null);
+    } else if (twoPlayer) {
+      setTurn((t) => 1 - t);
+    }
+  };
+
+  const total = placed.length;
+
+  return (
+    <Shell
+      game={game}
+      score={score}
+      scores={
+        twoPlayer
+          ? [
+              { label: "Player 1", value: scores[0], active: turn === 0 },
+              { label: "Player 2", value: scores[1], active: turn === 1 },
+            ]
+          : undefined
+      }
+      step={found.length}
+      total={total}
+      onExit={onExit}
+    >
+      {total > 0 && found.length === total ? (
+        <Finished
+          score={score}
+          result={quizResult(scores, twoPlayer)}
+          onRestart={() => {
+            setSeed((s) => s + 1);
+            setFound([]);
+            setScores([0, 0]);
+            setTurn(0);
+            setNote(null);
+            setStart(null);
+          }}
+        />
+      ) : (
+        <div className="grid gap-4 lg:grid-cols-[auto_1fr]">
+          <div className="rounded-xl bg-cream p-3 ring-1 ring-black/10">
+            <div
+              className="grid gap-1"
+              style={{ gridTemplateColumns: `repeat(${size}, minmax(0, 1fr))` }}
+            >
+              {letters.map((row, r) =>
+                row.map((letter, c) => {
+                  const key = `${r}-${c}`;
+                  const isFound = foundCells.has(key);
+                  const isStart = start === key;
+                  return (
+                    <button
+                      key={key}
+                      onClick={() => pick(key)}
+                      className={`aspect-square min-w-9 rounded-md text-sm font-semibold uppercase ring-1 transition-colors active:translate-y-px ${
+                        isFound
+                          ? "bg-teal text-cream ring-teal/70"
+                          : isStart
+                            ? "bg-saffron text-cream ring-saffron/70"
+                            : "bg-cream text-ink ring-ink/15 hover:bg-turmeric/20"
+                      }`}
+                    >
+                      {letter}
+                    </button>
+                  );
+                }),
+              )}
+            </div>
+            <p className="mt-2 text-center text-xs text-ink/55">
+              Tap the first letter, then the last letter of a word.
+            </p>
+          </div>
+
+          <div className="rounded-xl bg-cream p-4 ring-1 ring-black/10">
+            <p className="font-display text-lg font-semibold text-ink">Words to find</p>
+            <ul className="mt-3 space-y-2">
+              {placed.map((p) => {
+                const entry = game.searchWords.find((w) => w.word.toUpperCase() === p.word);
+                const isFound = found.includes(p.word);
+                return (
+                  <li key={p.word} className="text-sm">
+                    <span
+                      className={`font-semibold tracking-widest ${
+                        isFound ? "text-teal line-through" : "text-ink"
+                      }`}
+                    >
+                      {p.word}
+                    </span>
+                    {entry?.hint && <span className="ml-2 text-xs text-ink/55">{entry.hint}</span>}
+                  </li>
+                );
+              })}
+            </ul>
+            {note && <p className="mt-4 rounded-lg bg-turmeric/15 px-3 py-2.5 text-sm text-ink/75">{note}</p>}
+          </div>
+        </div>
+      )}
+    </Shell>
+  );
+}
+
 export function GamePlayer({ game, onExit }: { game: FestivalGame; onExit: () => void }) {
   if (game.gameKind === "quiz") return <QuizGame game={game} onExit={onExit} />;
   if (game.gameKind === "memory") return <MemoryGame game={game} onExit={onExit} />;
   if (game.gameKind === "word") return <WordGame game={game} onExit={onExit} />;
+  if (game.gameKind === "wordsearch") return <WordSearchGame game={game} onExit={onExit} />;
   if (game.gameKind === "scratch") return <ScratchGuide game={game} onExit={onExit} />;
   return <StoryGame game={game} onExit={onExit} />;
 }

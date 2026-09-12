@@ -38,12 +38,14 @@ const KIND_ART: Record<GameKind, string> = {
   quiz: quizArt,
   memory: memoryArt,
   word: wordArt,
+  wordsearch: wordArt,
   story: storyArt,
   scratch: scratchArt,
 };
 
-const KINDS: GameKind[] = ["quiz", "memory", "word", "story", "scratch"];
+const KINDS: GameKind[] = ["quiz", "memory", "word", "wordsearch", "story", "scratch"];
 const AGES = ["Ages 5–8", "Ages 8–12", "Ages 12–15"];
+const GRID_SIZES = [4, 5, 6, 7, 8];
 
 function Lanterns() {
   const lamps = [
@@ -140,14 +142,20 @@ function Index() {
   const [kind, setKind] = useState<GameKind>("memory");
   const [age, setAge] = useState(AGES[1]!);
   const [players, setPlayers] = useState<1 | 2>(1);
+  const [gridSize, setGridSize] = useState(6);
   const [games, setGames] = useState<FestivalGame[]>([]);
   const [playing, setPlaying] = useState<FestivalGame | null>(null);
   const [plays, setPlays] = useState<Record<string, number>>({});
 
   const callGenerate = useServerFn(generateGame);
   const mutation = useMutation({
-    mutationFn: (input: { prompt: string; gameKind: GameKind; ageRange: string; playerCount: 1 | 2 }) =>
-      callGenerate({ data: input }),
+    mutationFn: (input: {
+      prompt: string;
+      gameKind: GameKind;
+      ageRange: string;
+      playerCount: 1 | 2;
+      gridSize: number;
+    }) => callGenerate({ data: input }),
     onSuccess: (game) => {
       setGames((g) => [game, ...g]);
       setPlaying(game);
@@ -265,13 +273,38 @@ function Index() {
                   </button>
                 ))}
               </div>
+              {kind === "wordsearch" && (
+                <div className="mt-3">
+                  <p className="mb-1.5 text-[11px] font-semibold tracking-[0.15em] text-ink/50 uppercase">
+                    Grid size
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {GRID_SIZES.map((g) => (
+                      <button
+                        key={g}
+                        onClick={() => setGridSize(g)}
+                        className={`rounded-full px-3 py-1 text-xs font-semibold ring-1 active:translate-y-px ${
+                          gridSize === g
+                            ? "bg-saffron text-cream ring-saffron/70"
+                            : "border border-ink/20 text-ink/70 ring-transparent"
+                        }`}
+                      >
+                        {g}×{g}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
               <div className="mt-4 flex items-center justify-between gap-3">
                 <span className="text-xs text-ink/50">
                   {age} · {players === 2 ? "2 players" : "1 player"}
+                  {kind === "wordsearch" ? ` · ${gridSize}×${gridSize}` : ""}
                 </span>
                 <button
                   disabled={mutation.isPending || prompt.trim().length === 0}
-                  onClick={() => mutation.mutate({ prompt, gameKind: kind, ageRange: age, playerCount: players })}
+                  onClick={() =>
+                    mutation.mutate({ prompt, gameKind: kind, ageRange: age, playerCount: players, gridSize })
+                  }
                   className="rounded-full bg-marigold px-4 py-2 text-sm font-semibold text-dusk-deep ring-1 ring-saffron/70 active:translate-y-px disabled:opacity-60"
                 >
                   {mutation.isPending ? "Weaving…" : "Generate game"}
