@@ -142,14 +142,20 @@ function Index() {
   const [kind, setKind] = useState<GameKind>("memory");
   const [age, setAge] = useState(AGES[1]!);
   const [players, setPlayers] = useState<1 | 2>(1);
+  const [gridSize, setGridSize] = useState(6);
   const [games, setGames] = useState<FestivalGame[]>([]);
   const [playing, setPlaying] = useState<FestivalGame | null>(null);
   const [plays, setPlays] = useState<Record<string, number>>({});
 
   const callGenerate = useServerFn(generateGame);
   const mutation = useMutation({
-    mutationFn: (input: { prompt: string; gameKind: GameKind; ageRange: string; playerCount: 1 | 2 }) =>
-      callGenerate({ data: input }),
+    mutationFn: (input: {
+      prompt: string;
+      gameKind: GameKind;
+      ageRange: string;
+      playerCount: 1 | 2;
+      gridSize: number;
+    }) => callGenerate({ data: input }),
     onSuccess: (game) => {
       setGames((g) => [game, ...g]);
       setPlaying(game);
